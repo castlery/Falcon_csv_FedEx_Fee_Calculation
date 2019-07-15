@@ -5,6 +5,7 @@ import math
 import requests
 import falcon
 import pandas as pd
+
 filename = "ship_fee_sheet.csv"
 csv_data = pd.read_csv(filename) 
 ship_fee_list=csv_data.values.tolist()
@@ -12,7 +13,7 @@ ship_fee_list=csv_data.values.tolist()
 filename2 = "zone_sheet.csv"
 csv_data2 = pd.read_csv(filename2) 
 zone_list=csv_data2.values.tolist()
-print(zone_list)
+
 #get the data of the fuel list() (similar procedure as above)
 filename3 = "fuel_sheet.csv"
 csv_data3 = pd.read_csv(filename3,encoding = "ISO-8859-1") 
@@ -126,23 +127,28 @@ def oversize(length,width,height,weight):
     else:
         return 0,weight
 
-def search_zone(zipcode,zone_list):
+def search_zone(zipcode,zone_list,ship_region):
     """
     This function use the zipcode and the zone_list(from database) to compare between Western and Eastern,
     get the smaller zone then return both the region info(Eastern or Western) and zone number 
     """
     result_list=[]
     for i in zone_list:
-        try:
-            if(zipcode>=int(i[1]) and zipcode<=int(i[2])):
-                result_list.append(i)
-        except:
-            continue
+        if(zipcode>=int(i[1]) and zipcode<=int(i[2])):
+            result_list.append(i)
+            
     print(result_list)
-    if(result_list[0][3]<result_list[1][3]):
+    if(math.isnan(result_list[0][3]) and math.isnan(result_list[1][3])):
+        return 'NA','NA'
+    elif (math.isnan(result_list[0][3])):
+        return result_list[1][0],int(result_list[1][3])
+    elif (math.isnan(result_list[1][3])):
         return result_list[0][0],int(result_list[0][3])
     else:
-        return result_list[1][0],int(result_list[1][3])
+        if(result_list[0][3]<result_list[1][3]):
+            return result_list[0][0],int(result_list[0][3])
+        else:
+            return result_list[1][0],int(result_list[1][3])
 #calculate the normal shipping fee
 def shipping_fee(zone,weight,ship_fee_list):
     """
@@ -207,12 +213,13 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
     wooden_or_metal=INPUT['wooden_or_metal']
     residential_surcharge_status=INPUT['residential_surcharge']
     ground_residential_surcharge_status=INPUT['ground_residential_surcharge']
+    ship_region=INPUT["ship_region"]
     #calculate residential surcharge fee
     residential_surcharge_fee=residential_surcharge(residential_surcharge_status,ground_residential_surcharge_status)
     #calculate the remote area charge fee
     remote_charge_fee=remote_charge(zipcode_whole,remote_list,super_remote_list)
     #get the region and zone from zipcode
-    region,zone=search_zone(zipcode_region,zone_list)
+    region,zone=search_zone(zipcode_region,zone_list,ship_region)
     #change the region into more readable string
     region=region_change(region)
 
@@ -221,13 +228,15 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
     fuel_surcharge_rate=fuel_rate(diesel_price,fuel_list)
     # check authorization, if unauthorized, just quit
     OUTPUT={}
-    OUTPUT['authorization_status']="Unauthorized"
+    
     authorization_status=authorization_check(length,width,height,weight)
     if (authorization_status==1):
-##        print("This item is unauthorized")
-        return OUTPUT
-##        exit()
 
+        OUTPUT['status']="Invalid: Item Unauthorized"
+        return OUTPUT
+    if (zone=='NA'):
+        OUTPUT['status']="Invalid: Postcode not Supported"
+        return OUTPUT
     #calculate additional and oversize fees
     additional=additional_handing(length,width,height,weight,irregular_shape,package_material,wooden_or_metal)
     #check the oversize fee and whether weight need to be updated
@@ -255,8 +264,8 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
     output['diesel_price_date']=current_date
     return output 
 result_json={"length": 15.748, "width": 23.622, "height": 78.74,
- "weight": 66.1, "postcode": 94102, "irregular_shape": 1,
+ "weight": 66.1, "postcode": 34302, "irregular_shape": 1,
  "package_material": 0, "wooden_or_metal": 0,"residential_surcharge":1,
- "ground_residential_surcharge":0}
+ "ground_residential_surcharge":0,"ship_region":'LA DC'}
 output=final(result_json,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 print(output)

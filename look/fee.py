@@ -19,7 +19,7 @@ class Resource(object):
         filename2 = "look/zone_sheet.csv"
         csv_data2 = pd.read_csv(filename2) 
         zone_list=csv_data2.values.tolist()
-        
+
         #get the data of the fuel list() (similar procedure as above)
         filename3 = "look/fuel_sheet.csv"
         csv_data3 = pd.read_csv(filename3,encoding = "ISO-8859-1") 
@@ -133,23 +133,28 @@ class Resource(object):
             else:
                 return 0,weight
 
-        def search_zone(zipcode,zone_list):
+        def search_zone(zipcode,zone_list,ship_region):
             """
             This function use the zipcode and the zone_list(from database) to compare between Western and Eastern,
             get the smaller zone then return both the region info(Eastern or Western) and zone number 
             """
             result_list=[]
             for i in zone_list:
-                try:
-                    if(zipcode>=int(i[1]) and zipcode<=int(i[2])):
-                        result_list.append(i)
-                except:
-                    continue
-           
-            if(result_list[0][3]<result_list[1][3]):
+                if(zipcode>=int(i[1]) and zipcode<=int(i[2])):
+                    result_list.append(i)
+                    
+            print(result_list)
+            if(math.isnan(result_list[0][3]) and math.isnan(result_list[1][3])):
+                return 'NA','NA'
+            elif (math.isnan(result_list[0][3])):
+                return result_list[1][0],int(result_list[1][3])
+            elif (math.isnan(result_list[1][3])):
                 return result_list[0][0],int(result_list[0][3])
             else:
-                return result_list[1][0],int(result_list[1][3])
+                if(result_list[0][3]<result_list[1][3]):
+                    return result_list[0][0],int(result_list[0][3])
+                else:
+                    return result_list[1][0],int(result_list[1][3])
         #calculate the normal shipping fee
         def shipping_fee(zone,weight,ship_fee_list):
             """
@@ -214,12 +219,13 @@ class Resource(object):
             wooden_or_metal=INPUT['wooden_or_metal']
             residential_surcharge_status=INPUT['residential_surcharge']
             ground_residential_surcharge_status=INPUT['ground_residential_surcharge']
+            ship_region=INPUT["ship_region"]
             #calculate residential surcharge fee
             residential_surcharge_fee=residential_surcharge(residential_surcharge_status,ground_residential_surcharge_status)
             #calculate the remote area charge fee
             remote_charge_fee=remote_charge(zipcode_whole,remote_list,super_remote_list)
             #get the region and zone from zipcode
-            region,zone=search_zone(zipcode_region,zone_list)
+            region,zone=search_zone(zipcode_region,zone_list,ship_region)
             #change the region into more readable string
             region=region_change(region)
 
@@ -228,11 +234,15 @@ class Resource(object):
             fuel_surcharge_rate=fuel_rate(diesel_price,fuel_list)
             # check authorization, if unauthorized, just quit
             OUTPUT={}
-            OUTPUT['authorization_status']="Unauthorized"
+            
             authorization_status=authorization_check(length,width,height,weight)
             if (authorization_status==1):
+
+                OUTPUT['status']="Invalid: Item Unauthorized"
                 return OUTPUT
-##        exit()
+            if (zone=='NA'):
+                OUTPUT['status']="Invalid: Postcode not Supported"
+                return OUTPUT
             #calculate additional and oversize fees
             additional=additional_handing(length,width,height,weight,irregular_shape,package_material,wooden_or_metal)
             #check the oversize fee and whether weight need to be updated
@@ -248,18 +258,20 @@ class Resource(object):
             total=additional+oversize_fee+ship_fee+fuel_fee+remote_charge_fee+residential_surcharge_fee
             #output as JSON
             output={}
-            output['weight']=weight
-            output['additional_handing_fee']=additional
-            output['oversize_fee']=oversize_fee
-            output['ship_fee']=ship_fee
-            output['fuel_fee']=fuel_fee
-            output['remote_area_charge']=remote_charge_fee
-            output['residential_surcharge_fee']=residential_surcharge_fee
-            output['total_fee']=total
+            output['weight(lbs)']=weight
+            output['additional_handing_fee(USD)']=additional
+            output['oversize_fee(USD)']=oversize_fee
+            output['ship_surcharge_fee(USD)']=ship_fee
+            output['fuel_fee(USD)']=fuel_fee
+            output['remote_area_charge(USD)']=remote_charge_fee
+            output['residential_surcharge_fee(USD)']=residential_surcharge_fee
+            output['total_fee(USD)']=total
             output['shipping_region']=region
             output['diesel_price_date']=current_date
-            return output 
-    
+            return output
+#input units: length,width,height: inch
+#weightL lbs
+#condition checking :1 for yes, 0 for no
         result_json=json.loads(req.stream.read().decode('utf-8'))
         output=final(result_json,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
         print(result_json)
