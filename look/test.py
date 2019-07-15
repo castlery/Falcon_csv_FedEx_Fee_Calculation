@@ -252,17 +252,20 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
     total=additional+oversize_fee+ship_fee+fuel_fee+remote_charge_fee+residential_surcharge_fee
     #output as JSON
     output={}
-    output['weight']=weight
-    output['additional_handing_fee']=additional
-    output['oversize_fee']=oversize_fee
-    output['ship_fee']=ship_fee
-    output['fuel_fee']=fuel_fee
-    output['remote_area_charge']=remote_charge_fee
-    output['residential_surcharge_fee']=residential_surcharge_fee
-    output['total_fee']=total
+    output['weight(lbs)']=weight
+    output['additional_handing_fee(USD)']=additional
+    output['oversize_fee(USD)']=oversize_fee
+    output['ship_surcharge_fee(USD)']=ship_fee
+    output['fuel_fee(USD)']=fuel_fee
+    output['remote_area_charge(USD)']=remote_charge_fee
+    output['residential_surcharge_fee(USD)']=residential_surcharge_fee
+    output['total_fee(USD)']=total
     output['shipping_region']=region
     output['diesel_price_date']=current_date
-    return output 
+    return output
+#input units: length,width,height: inch
+#weightL lbs
+#condition checking :1 for yes, 0 for no
 result_json={"length": 15.748, "width": 23.622, "height": 78.74,
  "weight": 66.1, "postcode": 34302, "irregular_shape": 1,
  "package_material": 0, "wooden_or_metal": 0,"residential_surcharge":1,
