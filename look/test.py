@@ -132,23 +132,40 @@ def search_zone(zipcode,zone_list,ship_region):
     This function use the zipcode and the zone_list(from database) to compare between Western and Eastern,
     get the smaller zone then return both the region info(Eastern or Western) and zone number 
     """
-    result_list=[]
-    for i in zone_list:
-        if(zipcode>=int(i[1]) and zipcode<=int(i[2])):
-            result_list.append(i)
-            
-    print(result_list)
-    if(math.isnan(result_list[0][3]) and math.isnan(result_list[1][3])):
-        return 'NA','NA'
-    elif (math.isnan(result_list[0][3])):
-        return result_list[1][0],int(result_list[1][3])
-    elif (math.isnan(result_list[1][3])):
-        return result_list[0][0],int(result_list[0][3])
-    else:
-        if(result_list[0][3]<result_list[1][3]):
+    if ship_region=='':
+        result_list=[]
+        for i in zone_list:
+            if(zipcode>=int(i[1]) and zipcode<=int(i[2])):
+                result_list.append(i)
+                
+        print(result_list)
+        if(math.isnan(result_list[0][3]) and math.isnan(result_list[1][3])):
+            return 'NA','NA'
+        elif (math.isnan(result_list[0][3])):
+            return result_list[1][0],int(result_list[1][3])
+        elif (math.isnan(result_list[1][3])):
             return result_list[0][0],int(result_list[0][3])
         else:
-            return result_list[1][0],int(result_list[1][3])
+            if(result_list[0][3]<result_list[1][3]):
+                return result_list[0][0],int(result_list[0][3])
+            else:
+                return result_list[1][0],int(result_list[1][3])
+    elif ship_region=='LA_DC':
+        for i in zone_list:
+            if(zipcode>=int(i[1]) and zipcode<=int(i[2]) and i[0]=='W'):
+                print(i)
+                if(math.isnan(i[3])):
+                    return i[0],'NA'
+                else:
+                    return i[0],int(i[3])
+    elif ship_region=='NJ_DC':
+        for i in zone_list:
+            if(zipcode>=int(i[1]) and zipcode<=int(i[2]) and i[0]=='E'):
+                print(i)
+                if(math.isnan(i[3])):
+                    return i[0],'NA'
+                else:
+                    return i[0],int(i[3])
 #calculate the normal shipping fee
 def shipping_fee(zone,weight,ship_fee_list):
     """
@@ -267,8 +284,8 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 #weightL lbs
 #condition checking :1 for yes, 0 for no
 result_json={"length": 15.748, "width": 23.622, "height": 78.74,
- "weight": 66.1, "postcode": 34302, "irregular_shape": 1,
+ "weight": 66.1, "postcode": 94102, "irregular_shape": 1,
  "package_material": 0, "wooden_or_metal": 0,"residential_surcharge":1,
- "ground_residential_surcharge":0,"ship_region":'LA DC'}
+ "ground_residential_surcharge":0,"ship_region":'LA_DC'}
 output=final(result_json,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 print(output)
