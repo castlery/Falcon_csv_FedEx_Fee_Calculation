@@ -270,7 +270,7 @@ class Resource(object):
 
             #get the chargeable weight
             weight=max(volumetric_weight(length,width,height),weight)
-            weight=math.floor(weight)
+            weight=math.ceil(weight)
             #calculate ship_fee and fuel_fee
             ship_fee=shipping_fee(zone,weight,ship_fee_list)
             fuel_fee=fuel_fee_charge(additional,oversize_fee,ship_fee,remote_charge_fee,residential_surcharge_fee,fuel_surcharge_rate)

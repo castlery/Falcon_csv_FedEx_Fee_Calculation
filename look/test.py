@@ -168,16 +168,18 @@ def search_zone(zipcode,zone_list,ship_region):
                     return i[0],int(i[3])
 #calculate the normal shipping fee
 def shipping_fee(zone,weight,ship_fee_list):
+    
     """
     input:zone number, chargeable weight, ship_fee_list(from database)
     output: normal shipping fee
     """
     for i in ship_fee_list:
-        if (weight==int(i[0])):
+        if ((weight)==int(i[0])):
             return float(i[zone-1])
 #calculate the fuel_fee
 def fuel_fee_charge(additional,oversize,ship_fee,remote_charge,residential_charge,rate):
     """This function calculate the fuel fee"""
+    print(additional,oversize,ship_fee,remote_charge,residential_charge)
     return (additional+oversize+ship_fee+remote_charge+residential_charge)*rate
 #get the volumetric_weight according to the box size
 def volumetric_weight(length,width,height):
@@ -265,7 +267,8 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 
     #get the chargeable weight
     weight=max(volumetric_weight(length,width,height),weight)
-    weight=math.floor(weight)
+    weight=math.ceil(weight)
+    print(weight)
     #calculate ship_fee and fuel_fee
     ship_fee=shipping_fee(zone,weight,ship_fee_list)
     fuel_fee=fuel_fee_charge(additional,oversize_fee,ship_fee,remote_charge_fee,residential_surcharge_fee,fuel_surcharge_rate)
@@ -287,9 +290,9 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 #input units: length,width,height: inch
 #weightL lbs
 #condition checking :1 for yes, 0 for no
-result_json={"length": 15.748, "width": 23.622, "height": 78.74,
- "weight": 66.1, "postcode": '94102', "irregular_shape": 1,
+result_json={"length": 20.5511811, "width": 29.52755906, "height":32.28346457,
+ "weight": 121.2542442, "postcode": 94102, "irregular_shape": 1,
  "package_material": 0, "wooden_or_metal": 0,"IsResidential":1,
- "ship_region":'LA_DC'}
+"ship_region":"NJ_DC"}
 output=final(result_json,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 print(output)
