@@ -34,7 +34,6 @@ class Resource(object):
         csv_data5 = pd.read_csv(filename5) 
         super_remote_list=csv_data5.values.tolist()
 
-        # binary search algorithm
         def binary_search(list1, item):
             n = len(list1)
             if 0 == n:
@@ -215,30 +214,34 @@ class Resource(object):
             else:
                 return 0
         #calculate (ground) residential surcharge
-        def residential_surcharge(residential,ground):
-            if (ground ==1):
-                return 4.4
-            elif (residential==1):
+        def residential_surcharge(IsResidential,weight):
+            if (IsResidential !=1):
+                return 0
+            elif (weight<70):
                 return 2.6
             else:
-                return 0 
+                return 4.4
 
         def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list):
             length=INPUT['length']
             width=INPUT['width']
             height=INPUT['height']
             weight=INPUT['weight']
-            zipcode_whole=INPUT['postcode']
+            try:
+                zipcode_whole=int(INPUT['postcode'])
+            except:
+                OUTPUT['status']="Invalid: Postcode is not a number"
+                return OUTPUT
             #get the first 3 digit of zipcode to get the region
             zipcode_region=int(str(INPUT['postcode'])[0:3])
             irregular_shape=INPUT['irregular_shape']
             package_material=INPUT['package_material']
             wooden_or_metal=INPUT['wooden_or_metal']
-            residential_surcharge_status=INPUT['residential_surcharge']
-            ground_residential_surcharge_status=INPUT['ground_residential_surcharge']
+            residential_surcharge_status=INPUT['IsResidential']
+            
             ship_region=INPUT["ship_region"]
             #calculate residential surcharge fee
-            residential_surcharge_fee=residential_surcharge(residential_surcharge_status,ground_residential_surcharge_status)
+            residential_surcharge_fee=residential_surcharge(residential_surcharge_status,weight)
             #calculate the remote area charge fee
             remote_charge_fee=remote_charge(zipcode_whole,remote_list,super_remote_list)
             #get the region and zone from zipcode

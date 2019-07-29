@@ -209,30 +209,34 @@ def remote_charge(zipcode,remote_list,super_remote_list):
     else:
         return 0
 #calculate (ground) residential surcharge
-def residential_surcharge(residential,ground):
-    if (ground ==1):
-        return 4.4
-    elif (residential==1):
+def residential_surcharge(IsResidential,weight):
+    if (IsResidential !=1):
+        return 0
+    elif (weight<70):
         return 2.6
     else:
-        return 0 
+        return 4.4
 
 def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list):
     length=INPUT['length']
     width=INPUT['width']
     height=INPUT['height']
     weight=INPUT['weight']
-    zipcode_whole=INPUT['postcode']
+    try:
+        zipcode_whole=int(INPUT['postcode'])
+    except:
+        OUTPUT['status']="Invalid: Postcode is not a number"
+        return OUTPUT
     #get the first 3 digit of zipcode to get the region
     zipcode_region=int(str(INPUT['postcode'])[0:3])
     irregular_shape=INPUT['irregular_shape']
     package_material=INPUT['package_material']
     wooden_or_metal=INPUT['wooden_or_metal']
-    residential_surcharge_status=INPUT['residential_surcharge']
-    ground_residential_surcharge_status=INPUT['ground_residential_surcharge']
+    residential_surcharge_status=INPUT['IsResidential']
+    
     ship_region=INPUT["ship_region"]
     #calculate residential surcharge fee
-    residential_surcharge_fee=residential_surcharge(residential_surcharge_status,ground_residential_surcharge_status)
+    residential_surcharge_fee=residential_surcharge(residential_surcharge_status,weight)
     #calculate the remote area charge fee
     remote_charge_fee=remote_charge(zipcode_whole,remote_list,super_remote_list)
     #get the region and zone from zipcode
@@ -284,8 +288,8 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 #weightL lbs
 #condition checking :1 for yes, 0 for no
 result_json={"length": 15.748, "width": 23.622, "height": 78.74,
- "weight": 66.1, "postcode": 94102, "irregular_shape": 1,
- "package_material": 0, "wooden_or_metal": 0,"residential_surcharge":1,
- "ground_residential_surcharge":0,"ship_region":'LA_DC'}
+ "weight": 66.1, "postcode": '94102', "irregular_shape": 1,
+ "package_material": 0, "wooden_or_metal": 0,"IsResidential":1,
+ "ship_region":'LA_DC'}
 output=final(result_json,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 print(output)
