@@ -80,6 +80,7 @@ class Resource(object):
             This function use the box's information to check whether this item is authorized to ship
             output:1 for unauthorized, 0 for authorized
             """
+            weight=max(weight,volumetric_weight(length,width,height))
             if (weight>150 or max(length,width,height)>108 or (2*(length+width+height)-max(length,width,height))>165):
                 return 1
             else:

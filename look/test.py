@@ -75,6 +75,7 @@ def authorization_check(length,width,height,weight):
     This function use the box's information to check whether this item is authorized to ship
     output:1 for unauthorized, 0 for authorized
     """
+    weight=max(weight,volumetric_weight(length,width,height))
     if (weight>150 or max(length,width,height)>108 or (2*(length+width+height)-max(length,width,height))>165):
         return 1
     else:
@@ -290,7 +291,7 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 #input units: length,width,height: inch
 #weightL lbs
 #condition checking :1 for yes, 0 for no
-result_json={"length": 20.5511811, "width": 29.52755906, "height":32.28346457,
+result_json={"length": 40.5511811, "width": 29.52755906, "height":32.28346457,
  "weight": 121.2542442, "postcode": 94102, "irregular_shape": 1,
  "package_material": 0, "wooden_or_metal": 0,"IsResidential":1,
 "ship_region":"NJ_DC"}
