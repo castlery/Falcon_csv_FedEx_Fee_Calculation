@@ -34,6 +34,7 @@ class Resource(object):
         csv_data5 = pd.read_csv(filename5) 
         super_remote_list=csv_data5.values.tolist()
 
+         # binary search algorithm
         def binary_search(list1, item):
             n = len(list1)
             if 0 == n:
@@ -174,16 +175,18 @@ class Resource(object):
                             return i[0],int(i[3])
         #calculate the normal shipping fee
         def shipping_fee(zone,weight,ship_fee_list):
+            
             """
             input:zone number, chargeable weight, ship_fee_list(from database)
             output: normal shipping fee
             """
             for i in ship_fee_list:
-                if (weight==int(i[0])):
+                if ((weight)==int(i[0])):
                     return float(i[zone-1])
         #calculate the fuel_fee
         def fuel_fee_charge(additional,oversize,ship_fee,remote_charge,residential_charge,rate):
             """This function calculate the fuel fee"""
+            print(additional,oversize,ship_fee,remote_charge,residential_charge)
             return (additional+oversize+ship_fee+remote_charge+residential_charge)*rate
         #get the volumetric_weight according to the box size
         def volumetric_weight(length,width,height):
@@ -265,10 +268,13 @@ class Resource(object):
                 OUTPUT['status']="Invalid: Postcode not Supported"
                 return OUTPUT
             #calculate additional and oversize fees
-            additional=additional_handing(length,width,height,weight,irregular_shape,package_material,wooden_or_metal)
             #check the oversize fee and whether weight need to be updated
-            oversize_fee,weight=oversize(length,width,height,weight)   
-
+            oversize_fee,weight=oversize(length,width,height,weight)
+            print(oversize_fee)
+            if oversize_fee==0:
+                additional=additional_handing(length,width,height,weight,irregular_shape,package_material,wooden_or_metal)
+            else:
+                additional=0
             #get the chargeable weight
             weight=max(volumetric_weight(length,width,height),weight)
             weight=math.ceil(weight)

@@ -262,14 +262,16 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
         OUTPUT['status']="Invalid: Postcode not Supported"
         return OUTPUT
     #calculate additional and oversize fees
-    additional=additional_handing(length,width,height,weight,irregular_shape,package_material,wooden_or_metal)
     #check the oversize fee and whether weight need to be updated
-    oversize_fee,weight=oversize(length,width,height,weight)   
-
+    oversize_fee,weight=oversize(length,width,height,weight)
+    print(oversize_fee)
+    if oversize_fee==0:
+        additional=additional_handing(length,width,height,weight,irregular_shape,package_material,wooden_or_metal)
+    else:
+        additional=0
     #get the chargeable weight
     weight=max(volumetric_weight(length,width,height),weight)
     weight=math.ceil(weight)
-    print(weight)
     #calculate ship_fee and fuel_fee
     ship_fee=shipping_fee(zone,weight,ship_fee_list)
     fuel_fee=fuel_fee_charge(additional,oversize_fee,ship_fee,remote_charge_fee,residential_surcharge_fee,fuel_surcharge_rate)
@@ -291,7 +293,7 @@ def final(INPUT,ship_fee_list,zone_list,fuel_list,remote_list,super_remote_list)
 #input units: length,width,height: inch
 #weightL lbs
 #condition checking :1 for yes, 0 for no
-result_json={"length": 40.5511811, "width": 29.52755906, "height":32.28346457,
+result_json={"length": 20.5511811, "width": 19.52755906, "height":12.28346457,
  "weight": 121.2542442, "postcode": 94102, "irregular_shape": 1,
  "package_material": 0, "wooden_or_metal": 0,"IsResidential":1,
 "ship_region":"NJ_DC"}
