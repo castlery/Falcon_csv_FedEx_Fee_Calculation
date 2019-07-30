@@ -270,7 +270,7 @@ class Resource(object):
             #calculate additional and oversize fees
             #check the oversize fee and whether weight need to be updated
             oversize_fee,weight=oversize(length,width,height,weight)
-            print(oversize_fee)
+            #if oversize fee is charged, additional handling fee will not be charged anymore
             if oversize_fee==0:
                 additional=additional_handing(length,width,height,weight,irregular_shape,package_material,wooden_or_metal)
             else:
